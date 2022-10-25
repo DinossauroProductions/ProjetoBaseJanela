@@ -10,35 +10,74 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+
+import com.dinossauroProductions.components.Sprite;
+import com.dinossauroProductions.entities.Entity;
 
 
 public class Main extends Canvas implements Runnable, KeyListener, MouseListener{
 	
-	private static final long serialVersionUID = 1L;
 	
+	//engine specifics
+	
+	private static final long serialVersionUID = 1L;
 	public static JFrame frame;
 	private Thread thread;
 	public boolean isRunning = true;
-	public static final int WIDTH = 360*2;
-	public static final int HEIGHT = 160*2;
-	public static final double SCALE = 1;
+	public static final int WIDTH = 640;  //640 * 2 = 1280   16
+	public static final int HEIGHT = 360; //380 * 2 = 720    9
+	public static final double SCALE = 2;
 	public int maxFPS = 60;
 	private BufferedImage image;
 	public static int FPS = 0;
+	public Random rand;
 	
-
+	
+	//game objects
+	
+	public static BufferedImage spritesheet1;
+	
+	public static ArrayList<Entity> entities = new ArrayList<Entity>();
 
 	
 
 	public Main() {
+		rand = new Random();
 		addKeyListener(this);
 		addMouseListener(this);
 		setPreferredSize(new Dimension((int)(WIDTH*SCALE),(int)(HEIGHT*SCALE)));
 		initFrame();
 		
 		image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+		
+		
+		spritesheet1 = getImageAsset("/spritesheet1.png");
+		
+		int counter = 0;
+		for(int xx = 0; xx < WIDTH/16; xx++) {
+			for(int yy = 0; yy < (HEIGHT/16)+1; yy++) {
+				
+				
+				entities.add(new Entity(xx*16, yy*16)); 
+				int pos = (rand.nextInt(5))*16;
+				Sprite sprite = new Sprite(getImageSector(spritesheet1, pos, 0, 16, 16), entities.get(counter));
+				entities.get(counter).addComponent(sprite);
+				counter++;
+			}
+		}
+		
+		System.out.println("Há um total de "+entities.size()+" entidades");
+		/*
+		 * entities.add(new Entity(WIDTH/2, HEIGHT/2)); 
+		 * Sprite sprite = new Sprite(getImageSector(spritesheet1, 0, 0, 16, 16), entities.get(0));
+		 * entities.get(0).addComponent(sprite);
+		 */
 		
 	}
 	
@@ -55,6 +94,7 @@ public class Main extends Canvas implements Runnable, KeyListener, MouseListener
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
+		
 	}
 	
 	public synchronized void start() {
@@ -106,9 +146,15 @@ public class Main extends Canvas implements Runnable, KeyListener, MouseListener
 		//aplicar lógica
 		
 		
+		for(int i = 0; i < entities.size(); i++) {
+			
+			entities.get(i).tick();
+			
+		}
 		
 		
 		
+		//
 		
 	}
 	public void render() {
@@ -126,6 +172,12 @@ public class Main extends Canvas implements Runnable, KeyListener, MouseListener
 		//render stuff
 		
 		
+		for(int i = 0; i < entities.size(); i++) {
+			
+			entities.get(i).render(g);
+			
+		}
+		
 		
 		
 			
@@ -139,6 +191,49 @@ public class Main extends Canvas implements Runnable, KeyListener, MouseListener
 		bs.show();
 		
 	}
+	
+	
+	public BufferedImage getImageAsset(String path) {
+		
+		BufferedImage image;
+		
+		try {
+			
+			image = ImageIO.read(getClass().getResource(path));
+			return image;
+			
+			
+		} catch (IOException e) {
+			
+			System.out.println("Imagem de path "+path+" não foi encontrada.");
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+	
+	public BufferedImage getImageSector(BufferedImage image, int x, int y, int width, int height) {
+		
+		if(x > image.getWidth() || y > image.getHeight()) {
+			//crop fora da imagem
+			System.out.println("Crop impossível");
+			return null;
+		}
+		else if(width > image.getWidth() || height > image.getHeight()) {
+			//crop grande demais
+			System.out.println("Crop impossível");
+			return null;
+		}
+		else if(x + width > image.getWidth() || y + height > image.getHeight()) {
+			//crop pega fora da tela
+			System.out.println("Crop impossível");
+			return null;
+		}
+		
+		return image.getSubimage(x, y, width, height);
+		
+	}
+	
 
 	public void keyPressed(KeyEvent e) {
 		
