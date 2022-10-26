@@ -9,7 +9,10 @@ public class Sprite extends Component{
 	
 	private BufferedImage sprite;
 	private int x, y;
-	private Entity origin;
+	
+	
+	
+	//TODO: sistema de camadas, com cada sprite tendo uma prioridade a ser renderizado
 	
 	public Sprite(BufferedImage _sprite, Entity _origin) {
 		
@@ -28,4 +31,9 @@ public class Sprite extends Component{
 		
 	}
 
+	public void setSprite(BufferedImage sprite) {
+		this.sprite = sprite;
+	}
+	
+	
 }

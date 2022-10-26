@@ -5,10 +5,13 @@ import java.util.ArrayList;
 
 import com.dinossauroProductions.components.Component;
 
-public class Entity {
+public class Entity implements Comparable<Entity>{
 	
-	private double x, y;
+	protected double x, y;
 	private ArrayList<Component> components;
+	protected int layer = 0;
+	
+	public static final int FLOOR = 1, OBJECTS = 2, STATIC_ENTITIES = 3, MOVING_ENTITIES = 4, CEILING = 5;
 	
 	public Entity(double _x, double _y) {
 		
@@ -54,6 +57,12 @@ public class Entity {
 		}
 	}
 	
+	public void sortEntities(ArrayList<Entity> entities) {
+		
+		
+		
+	}
+	
 	public double getX() {
 		return x;
 	}
@@ -72,6 +81,31 @@ public class Entity {
 	
 	public void addComponent(Component component){
 		components.add(component);
+	}
+	
+	public ArrayList<Component> getComponents(){
+		return components;
+	}
+
+	public int getLayer() {
+		return layer;
+	}
+
+	
+
+	
+	public int compareTo(Entity o) {
+		
+		if(this.layer == o.layer) {
+			return 0;
+		}
+		else if(this.layer > o.layer) {
+			return 1;
+		}
+		else if(this.layer < o.layer) {
+			return -1;
+		}
+		return 0;
 	}
 
 }

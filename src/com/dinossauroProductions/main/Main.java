@@ -12,13 +12,19 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
+import com.dinossauroProductions.components.AnimatedSprite;
 import com.dinossauroProductions.components.Sprite;
+import com.dinossauroProductions.entities.CeilingTile;
 import com.dinossauroProductions.entities.Entity;
+import com.dinossauroProductions.entities.FloorTile;
+import com.dinossauroProductions.entities.Player;
+import com.dinossauroProductions.entities.Potion;
 
 
 public class Main extends Canvas implements Runnable, KeyListener, MouseListener{
@@ -29,10 +35,10 @@ public class Main extends Canvas implements Runnable, KeyListener, MouseListener
 	private static final long serialVersionUID = 1L;
 	public static JFrame frame;
 	private Thread thread;
-	public boolean isRunning = true;
-	public static final int WIDTH = 640;  //640 * 2 = 1280   16
-	public static final int HEIGHT = 360; //380 * 2 = 720    9
-	public static final double SCALE = 2;
+	public boolean isRunning = true; 
+	public static final int WIDTH = 640/2;  //640 * 2 = 1280   16
+	public static final int HEIGHT = 360/2; //380 * 2 = 720    9
+	public static final double SCALE = 2*2;
 	public int maxFPS = 60;
 	private BufferedImage image;
 	public static int FPS = 0;
@@ -45,6 +51,7 @@ public class Main extends Canvas implements Runnable, KeyListener, MouseListener
 	
 	public static ArrayList<Entity> entities = new ArrayList<Entity>();
 
+	public Player player;
 	
 
 	public Main() {
@@ -59,20 +66,46 @@ public class Main extends Canvas implements Runnable, KeyListener, MouseListener
 		
 		spritesheet1 = getImageAsset("/spritesheet1.png");
 		
-		int counter = 0;
+		
 		for(int xx = 0; xx < WIDTH/16; xx++) {
 			for(int yy = 0; yy < (HEIGHT/16)+1; yy++) {
 				
-				
-				entities.add(new Entity(xx*16, yy*16)); 
-				int pos = (rand.nextInt(5))*16;
-				Sprite sprite = new Sprite(getImageSector(spritesheet1, pos, 0, 16, 16), entities.get(counter));
-				entities.get(counter).addComponent(sprite);
-				counter++;
+				Entity ent = new FloorTile(xx*16, yy*16);
+				Sprite sprite = new Sprite(getImageSector(spritesheet1, 0, 16, 16, 16), ent);
+				ent.addComponent(sprite);
+				entities.add(ent); 
 			}
 		}
 		
+		for(int xx = 0; xx < WIDTH/16; xx++) {
+			for(int yy = 0; yy < (HEIGHT/16)+1-9; yy++) {
+				
+				Entity ent = new CeilingTile(xx*16, yy*16);
+				ent.addComponent(new Sprite(CeilingTile.CEILING, ent));
+				entities.add(ent); 
+			}
+		}
+		
+		
+		
+		player = new Player(WIDTH/2, HEIGHT/2);
+		entities.add(player);
+		player.addComponent(new Sprite(null, player));
+		player.addComponent(new AnimatedSprite(player, Player.WALKING, 15));
+		
+		Entity ent = new Potion((WIDTH/2)-8, HEIGHT/2-48);
+		ent.addComponent(new Sprite(Potion.POTION, ent));
+		entities.add(ent);
+		
+		
+		
+		
+		Collections.sort(entities);
+		
+		
+		
 		System.out.println("Há um total de "+entities.size()+" entidades");
+		
 		/*
 		 * entities.add(new Entity(WIDTH/2, HEIGHT/2)); 
 		 * Sprite sprite = new Sprite(getImageSector(spritesheet1, 0, 0, 16, 16), entities.get(0));
@@ -212,7 +245,7 @@ public class Main extends Canvas implements Runnable, KeyListener, MouseListener
 		
 	}
 	
-	public BufferedImage getImageSector(BufferedImage image, int x, int y, int width, int height) {
+	public static BufferedImage getImageSector(BufferedImage image, int x, int y, int width, int height) {
 		
 		if(x > image.getWidth() || y > image.getHeight()) {
 			//crop fora da imagem
